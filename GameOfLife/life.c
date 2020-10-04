@@ -6,19 +6,49 @@
  */
 #include <stdio.h>
 #include <unistd.h>
-#include "life.h"
 #include <stddef.h>
+#define FILENAME "lifeinput.txt"
+//LIVES determine how many spaces will be Alive initally (8:2 equals 4 spaces)
+#define LIVES 8
+#define DEAD 0
+#define ALIVE 1
+// Initialize the necessary variables that will be used across the program
+static int rounds = 0, XSIZE = 0, YSIZE = 0;
+static int initial_spaces[LIVES];
+//read input from text file
+int readInput();
+// initialize the board to all dead cells
+void initBoard(int vBoard[][YSIZE]);
+// play a round; updates the cells on the board
+void playRound(int vBoard[][YSIZE]);
+// print the board
+void printBoard(int vBoard[][YSIZE]);
+// determine the number of neighbors
+int neighbors(int vBoard[][YSIZE], int x, int y);
+
+/* determine if the given coordinates are within bounds
+ * returns 0 if the cell is out of bounds; returns 1 if
+ * the cell is in bounds
+ */
+int onBoard(int x, int y);
+
 
 int main(int argc, char *argv[]) {
-	int board[XSIZE][YSIZE];
-	int rounds = DEFAULTROUNDS;
 
+    //We read the inputs from our text file using this helper method
+    //Store input into the static variables created
+	readInput();
+     
+    //create a 2 dimensions array 
+	int board[XSIZE][YSIZE];
+
+    //Transfer the alive spaces from our inital spaces array into the board
 	initBoard(board);
-	board[5][5] = ALIVE;
-	board[5][6] = ALIVE;
-	board[5][7] = ALIVE;
-	board[6][6] = ALIVE;
+	for( size_t i = 0; i < LIVES; i = i + 2){
+		board[initial_spaces[i]][initial_spaces[i+1]] = ALIVE;
+	}
     
+    //Start playing the game as usual
 	printf("Playing %d rounds.\n\n", rounds);
 	for (int i=0; i<rounds; i++) {
 		printf("Round: %d\n", i+1);
@@ -29,6 +59,32 @@ int main(int argc, char *argv[]) {
 	}
 
 	return 0;
+}
+
+// Open text file and read in the number of rounds, grid size, and initial spaces
+int readInput(){
+    FILE *dataFile;
+    int counter = 0;
+    //Open file to read
+    dataFile = fopen(FILENAME, "r");
+
+    //Print cannot open when file is empty
+    if(dataFile == NULL){
+        fprintf(stderr,"Unable to open %s.\n",FILENAME);
+        return 1;
+    }
+
+    //We first retrieve the number of rounds, and the number of rows and columns for grid size
+    fscanf(dataFile,"%d%d%d",&rounds,&XSIZE,&YSIZE);
+
+    //Continue to run a loop to retrieve our inital spaces location by
+    //storing their rows and columns into an array
+    while (!feof(dataFile)) {
+        fscanf(dataFile,"%d",&initial_spaces[counter]);       
+        counter++;
+    }
+    fclose(dataFile);
+    return 0;
 }
 
 // initialize the board game
@@ -90,7 +146,7 @@ int onBoard(int x, int y) {
 }
 
 // return how many neigbors a cell has
-int neighbors(int vBoard[][YSIZE], int x, int y) {
+int neighbors(int vBoard[XSIZE][YSIZE], int x, int y) {
 	int n=0;
 
 	int xp1 = x + 1;
@@ -110,12 +166,12 @@ int neighbors(int vBoard[][YSIZE], int x, int y) {
 	return n;
 }
 
-void printBoard(int vBoard[XSIZE][YSIZE]) {
+void printBoard(int vBoard[][YSIZE]) {
 	
     //Print each row
-    for(size_t row = 0; row<15; row++){
+    for(size_t row = 0; row<XSIZE; row++){
         //Print each cell in row 5 spaces apart
-        for(size_t cell=0; cell < 15; cell++){
+        for(size_t cell=0; cell < YSIZE; cell++){
             printf("%5d",vBoard[row][cell]);
         }
         printf("\n");
