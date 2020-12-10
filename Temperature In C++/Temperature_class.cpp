@@ -4,11 +4,11 @@
 Temperature::Temperature(float degrees, int system)
 {
     //initialize celsius depends on which system was entered
-    if (system == Temperature::CELSIUS)
+    if (system == CELSIUS)
         Temperature::celsius = degrees;
-    else if (system == Temperature::FAHRENHEIT)
+    else if (system == FAHRENHEIT)
         Temperature::celsius = (degrees - 32) / 1.8;
-    else if (system == Temperature::KELVIN)
+    else if (system == KELVIN)
         Temperature::celsius = degrees - 273.15;
 }
 
